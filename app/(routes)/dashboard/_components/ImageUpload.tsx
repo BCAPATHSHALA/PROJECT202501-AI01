@@ -14,20 +14,20 @@ import {
 } from "@/components/ui/select";
 
 function ImageUpload() {
-    const AiModelList=[
-        {
-            name: "Gemini Google",
-            icon: "/google.png",
-        },
-        {
-            name:"Llama by Meta",
-            icon: "/meta.png",
-        },
-        {
-            name: "Deepseek",
-            icon: "/deepseek.png",
-        }
-    ]
+  const AiModelList = [
+    {
+      name: "Gemini Google",
+      icon: "/google.png",
+    },
+    {
+      name: "Llama by Meta",
+      icon: "/meta.png",
+    },
+    {
+      name: "Deepseek",
+      icon: "/deepseek.png",
+    },
+  ];
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const OnImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
@@ -93,20 +93,20 @@ function ImageUpload() {
               <SelectValue placeholder="Select AI Model" />
             </SelectTrigger>
             <SelectContent>
-                {AiModelList.map((model, index) => (
-                    <SelectItem key={index} value={model.name}>
-                    <div className="flex items-center">
-                        <Image
-                        src={model.icon}
-                        alt={model.name}
-                        width={30}
-                        height={30}
-                        className="w-8 h-8 object-contain mr-3"
-                        />
-                        <span>{model.name}</span>
-                    </div>
-                    </SelectItem>
-                ))}
+              {AiModelList.map((model, index) => (
+                <SelectItem key={index} value={model.name}>
+                  <div className="flex items-center">
+                    <Image
+                      src={model.icon}
+                      alt={model.name}
+                      width={30}
+                      height={30}
+                      className="w-8 h-8 object-contain mr-3"
+                    />
+                    <span>{model.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {/* Description */}
