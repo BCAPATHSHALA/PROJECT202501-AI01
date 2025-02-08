@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CloudUploadIcon, WandSparkles, X } from "lucide-react";
+import { CloudUploadIcon, Loader2Icon, WandSparkles, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import {
@@ -17,28 +17,17 @@ import { storage } from "@/configs/firebaseConfig";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { useAuthContext } from "@/app/provider";
+import { useRouter } from "next/navigation";
+import { AiModelList } from "@/data/Constants";
 
 function ImageUpload() {
-  const AiModelList = [
-    {
-      name: "Gemini Google",
-      icon: "/google.png",
-    },
-    {
-      name: "Llama by Meta",
-      icon: "/meta.png",
-    },
-    {
-      name: "Deepseek",
-      icon: "/deepseek.png",
-    },
-  ];
-
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const [file, setFile] = React.useState<File | null>(null);
   const [aiModel, setAiModel] = React.useState<string | null>(null);
   const [description, setDescription] = React.useState<string | null>(null);
   const { user } = useAuthContext();
+  const router = useRouter();
+  const [loading, setLoading] = React.useState(false);
 
   const OnImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
@@ -56,6 +45,9 @@ function ImageUpload() {
       console.error("Please fill all the fields");
       return;
     }
+
+    setLoading(true);
+
     // Save image to firebase storage
     const fileName = Date.now() + ".png";
     const imageRef = ref(storage, "wireframes_to_code/" + fileName); // Syntax: ref(storage, path)
@@ -79,7 +71,11 @@ function ImageUpload() {
       email: user?.email,
     });
     console.log("Result: ", reslut);
+
+    setLoading(false);
+    router.push(`/view-code/${uid4}`);
   };
+
   return (
     <div className="mt-10">
       {/* Image Upload & User Input */}
@@ -164,9 +160,18 @@ function ImageUpload() {
       </div>
       {/* Submit Button */}
       <div className="mt-10 flex justify-center items-center">
-        <Button onClick={OnConvertToCodeButtonClick}>
-          <WandSparkles className="w-5 h-5 mr-2" />
-          Convert to Code
+        <Button onClick={OnConvertToCodeButtonClick} disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2Icon className="w-5 h-5 mr-2 animate-spin" />
+              <span>Loading...</span>
+            </>
+          ) : (
+            <>
+              <WandSparkles className="w-5 h-5 mr-2" />
+              <span>Convert to Code</span>
+            </>
+          )}
         </Button>
       </div>
     </div>

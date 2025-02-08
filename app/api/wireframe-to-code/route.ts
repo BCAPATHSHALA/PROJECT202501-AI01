@@ -2,6 +2,7 @@
 
 import { db } from "@/configs/db";
 import { wireframeToCodeTable } from "@/configs/schema";
+import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -19,4 +20,20 @@ export async function POST(req: NextRequest) {
     .returning({ id: wireframeToCodeTable.id });
 
   return NextResponse.json({ result: result }, { status: 201 });
+}
+
+// API for getting a wireframe using uid
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const uid = searchParams?.get("uid");
+
+  if (uid) {
+    const result = await db
+      .select()
+      .from(wireframeToCodeTable)
+      .where(eq(wireframeToCodeTable.uid, uid));
+    return NextResponse.json({ result: result }, { status: 200 });
+  }
+
+  return NextResponse.json({ error: "No record found" }, { status: 404 });
 }
