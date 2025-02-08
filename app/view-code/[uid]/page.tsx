@@ -5,8 +5,11 @@ import axios from "axios";
 import { LoaderCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { SelectionDetails } from "../_components/SelectionDetails";
+import { CodeEditor } from "../_components/CodeEditor";
+import AppHeader from "@/app/_components/AppHeader";
 
-interface RECORD {
+export interface RECORD {
   id: number;
   imageUrl: string;
   aiModel: string;
@@ -19,6 +22,8 @@ const page = () => {
   const { uid } = useParams();
   const [loading, setLoading] = useState(false);
   const [codeResponse, setCodeResponse] = useState<string>("");
+  const [record, setRecord] = useState<RECORD | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     uid && getRecordInfo();
@@ -31,7 +36,15 @@ const page = () => {
       `/api/wireframe-to-code?uid=${uid}`
     );
 
-    if (!result?.data?.code) {
+    if (result?.data?.error) {
+      console.error(result?.data?.error);
+      return;
+    }
+
+    console.log("Fetched Record:", result?.data);
+    setRecord(result.data);
+
+    if (result?.data?.code === null) {
       // generate code if not found in db
       const record: RECORD = {
         id: result?.data?.id,
@@ -41,18 +54,12 @@ const page = () => {
         code: result?.data?.code,
         createdBy: result?.data?.createdBy,
       };
-
       generateCode(record);
     }
-    if (result?.data?.error) {
-      console.error(result?.data?.error);
-    }
-
     setLoading(false);
   };
 
-
-  // If your API is actually streaming responses (like OpenAI's streaming API), then using fetch instead of Axios is necessary:
+  // If your API is actually streaming responses (like OpenAI's streaming API), then using fetch instead of Axios is necessary
   const generateCode = async (record: RECORD) => {
     setLoading(true);
 
@@ -93,53 +100,23 @@ const page = () => {
       console.error("Error generating code:", error);
     } finally {
       setLoading(false);
+      setIsReady(true);
     }
   };
 
-  //! not working as expected for generating code
-  // const generateCode = async (record: RECORD) => {
-  //   setLoading(true);
-  //   const response = await axios.post(
-  //     "/api/ai-model",
-  //     {
-  //       imageUrl: record?.imageUrl,
-  //       aiModel: record.aiModel,
-  //       description: record?.description + ":" + prompt1,
-  //     },
-  //     {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       responseType: "text",
-  //     }
-  //   );
-
-  //   console.log("response", response);
-
-  //   const reader = response.data.body.getReader(); // TypeError: Cannot read properties of undefined (reading 'getReader')
-  //   const decoder = new TextDecoder("utf-8");
-
-  //   while (true) {
-  //     console.log("rrrrrrrrr", response.data);
-  //     const { value, done } = await reader.read(); // read() returns Promise<{ value: Uint8Array, done: boolean }>
-  //     if (done) break;
-  //     const chunk = decoder
-  //       .decode(value)
-  //       .replace("```typescript", "")
-  //       .replace("```", ""); // decode Uint8Array into string
-
-  //     setCodeResponse((prev) => prev + chunk);
-  //     console.log("chunk", chunk);
-  //   }
-
-  //   setLoading(false);
-  // };
-
   return (
     <div>
-      <h1>View Code</h1>
-      {loading && <LoaderCircle className="w-6 h-6 animate-spin" />}
-      <p>{codeResponse}</p>
+      <AppHeader hideSidebar={true} />
+      <div className="grid grid-cols-1 md:grid-cols-5 p-5 gap-10">
+        {/* Selection Details */}
+        <div>
+          <SelectionDetails record={record} />
+        </div>
+        {/* Code Editor */}
+        <div className="col-span-4">
+          <CodeEditor codeResponse={codeResponse} isReady={isReady} />
+        </div>
+      </div>
     </div>
   );
 };

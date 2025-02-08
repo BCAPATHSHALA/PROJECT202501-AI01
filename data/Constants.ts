@@ -16,4 +16,11 @@ export const AiModelList = [
   },
 ];
 
-export const prompt1 = "Generate code in react and tailwindcss from this wireframe:";
+// Todo: Make this prompt for sandpack based on ai model
+export const prompt1 =
+  "Generate code in react and tailwindcss from this wireframe:";
+
+export const DEPENDANCIES = {
+  react: "18.2.0",
+  "react-dom": "18.2.0",
+};

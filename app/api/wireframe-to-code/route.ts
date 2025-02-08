@@ -27,12 +27,21 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const uid = searchParams?.get("uid");
 
+  console.log("uid: ", uid);
+
   if (uid) {
     const result = await db
       .select()
       .from(wireframeToCodeTable)
       .where(eq(wireframeToCodeTable.uid, uid));
-    return NextResponse.json({ result: result }, { status: 200 });
+
+    console.log("result: ", result[0]);
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "No record found" }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0], { status: 200 });
   }
 
   return NextResponse.json({ error: "No record found" }, { status: 404 });

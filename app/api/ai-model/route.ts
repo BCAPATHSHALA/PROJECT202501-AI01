@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
         controller.enqueue(new TextEncoder().encode(text)); // send data chunk
       }
       controller.close();
+      // Todo: Update database with the generated code
     },
   });
 
