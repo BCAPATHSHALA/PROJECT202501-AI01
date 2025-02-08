@@ -48,16 +48,16 @@ function ImageUpload() {
 
     setLoading(true);
 
-    // Save image to firebase storage
-    const fileName = Date.now() + ".png";
-    const imageRef = ref(storage, "wireframes_to_code/" + fileName); // Syntax: ref(storage, path)
-    await uploadBytes(imageRef, file).then((snapshot) => {
-      console.log("Image Uploaded Successfully");
-    });
+    // // Save image to firebase storage
+    // const fileName = Date.now() + ".png";
+    // const imageRef = ref(storage, "wireframes_to_code/" + fileName); // Syntax: ref(storage, path)
+    // await uploadBytes(imageRef, file).then((snapshot) => {
+    //   console.log("Image Uploaded Successfully");
+    // });
 
-    // Download image url from firebase storage
-    const imageUrl = await getDownloadURL(imageRef);
-    console.log("Image URL: ", imageUrl);
+    // // Download image url from firebase storage
+    // const imageUrl = await getDownloadURL(imageRef);
+    // console.log("Image URL: ", imageUrl);
 
     // Save data to database
     const uid4 = uuidv4();

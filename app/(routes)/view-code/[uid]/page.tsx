@@ -51,44 +51,89 @@ const page = () => {
     setLoading(false);
   };
 
+
+  // If your API is actually streaming responses (like OpenAI's streaming API), then using fetch instead of Axios is necessary:
   const generateCode = async (record: RECORD) => {
     setLoading(true);
-    const response = await axios.post(
-      "/api/ai-model",
-      {
-        imageUrl: record?.imageUrl,
-        aiModel: record.aiModel,
-        description: record?.description + ":" + prompt1,
-      },
-      {
+
+    try {
+      const response = await fetch("/api/ai-model", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          imageUrl: record?.imageUrl,
+          aiModel: record?.aiModel,
+          description: record?.description + ":" + prompt1,
+        }),
+      });
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let accumulatedText = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder
+          .decode(value, { stream: true })
+          .replace("```typescript", "")
+          .replace("```", "");
+
+        accumulatedText += chunk;
+        setCodeResponse(accumulatedText);
+        console.log("chunk", chunk);
       }
-    );
-
-    if (!response?.data?.error) {
-      console.log("response", response);
-      return;
+    } catch (error) {
+      console.error("Error generating code:", error);
+    } finally {
+      setLoading(false);
     }
-
-    const reader = response.data.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    while (true) {
-      const { value, done } = await reader.read(); // read() returns Promise<{ value: Uint8Array, done: boolean }>
-      if (done) break;
-      const chunk = decoder
-        .decode(value)
-        .replace("```typescript", "")
-        .replace("```", ""); // decode Uint8Array into string
-
-      setCodeResponse((prev) => prev + chunk);
-      console.log("chunk", chunk);
-    }
-
-    setLoading(false);
   };
+
+  //! not working as expected for generating code
+  // const generateCode = async (record: RECORD) => {
+  //   setLoading(true);
+  //   const response = await axios.post(
+  //     "/api/ai-model",
+  //     {
+  //       imageUrl: record?.imageUrl,
+  //       aiModel: record.aiModel,
+  //       description: record?.description + ":" + prompt1,
+  //     },
+  //     {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       responseType: "text",
+  //     }
+  //   );
+
+  //   console.log("response", response);
+
+  //   const reader = response.data.body.getReader(); // TypeError: Cannot read properties of undefined (reading 'getReader')
+  //   const decoder = new TextDecoder("utf-8");
+
+  //   while (true) {
+  //     console.log("rrrrrrrrr", response.data);
+  //     const { value, done } = await reader.read(); // read() returns Promise<{ value: Uint8Array, done: boolean }>
+  //     if (done) break;
+  //     const chunk = decoder
+  //       .decode(value)
+  //       .replace("```typescript", "")
+  //       .replace("```", ""); // decode Uint8Array into string
+
+  //     setCodeResponse((prev) => prev + chunk);
+  //     console.log("chunk", chunk);
+  //   }
+
+  //   setLoading(false);
+  // };
 
   return (
     <div>
