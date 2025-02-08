@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "@/configs/firebaseConfig";
 
 function ImageUpload() {
   const AiModelList = [
@@ -28,7 +30,12 @@ function ImageUpload() {
       icon: "/deepseek.png",
     },
   ];
+
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [file, setFile] = React.useState<File | null>(null);
+  const [aiModel, setAiModel] = React.useState<string | null>(null);
+  const [description, setDescription] = React.useState<string | null>(null);
+
   const OnImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
 
@@ -36,7 +43,25 @@ function ImageUpload() {
       // create image url
       const imageUrl = URL.createObjectURL(file[0]);
       setImagePreview(imageUrl);
+      setFile(file[0]);
     }
+  };
+
+  const OnConvertToCodeButtonClick = async () => {
+    if (!file || !aiModel || !description) {
+      console.error("Please fill all the fields");
+      return;
+    }
+    // Save image to firebase storage
+    const fileName = Date.now() + ".png";
+    const imageRef = ref(storage, "wireframes_to_code/" + fileName); // Syntax: ref(storage, path)
+    await uploadBytes(imageRef, file).then((snapshot) => {
+      console.log("Image Uploaded Successfully");
+    });
+
+    // Download image url from firebase storage
+    const imageUrl = await getDownloadURL(imageRef);
+    console.log("Image URL: ", imageUrl);
   };
   return (
     <div className="mt-10">
@@ -88,7 +113,7 @@ function ImageUpload() {
         <div className="p-7 border border-dashed rounded-md shadow-md">
           {/* Select AI Model */}
           <h2 className="font-bold text-lg">Select AI Model</h2>
-          <Select>
+          <Select onValueChange={(value) => setAiModel(value)}>
             <SelectTrigger className="w-full mt-5">
               <SelectValue placeholder="Select AI Model" />
             </SelectTrigger>
@@ -116,12 +141,13 @@ function ImageUpload() {
           <Textarea
             className="mt-5 h-[200px]"
             placeholder="Write about your webpage"
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
       </div>
       {/* Submit Button */}
       <div className="mt-10 flex justify-center items-center">
-        <Button>
+        <Button onClick={OnConvertToCodeButtonClick}>
           <WandSparkles className="w-5 h-5 mr-2" />
           Convert to Code
         </Button>
