@@ -14,6 +14,9 @@ import {
 } from "@/components/ui/select";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "@/configs/firebaseConfig";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { useAuthContext } from "@/app/provider";
 
 function ImageUpload() {
   const AiModelList = [
@@ -35,6 +38,7 @@ function ImageUpload() {
   const [file, setFile] = React.useState<File | null>(null);
   const [aiModel, setAiModel] = React.useState<string | null>(null);
   const [description, setDescription] = React.useState<string | null>(null);
+  const { user } = useAuthContext();
 
   const OnImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
@@ -62,6 +66,19 @@ function ImageUpload() {
     // Download image url from firebase storage
     const imageUrl = await getDownloadURL(imageRef);
     console.log("Image URL: ", imageUrl);
+
+    // Save data to database
+    const uid4 = uuidv4();
+    console.log("UID: ", uid4);
+    const reslut = await axios.post("/api/wireframe-to-code", {
+      imageUrl:
+        "https://balsamiq.com/assets/learn/articles/wireframe-example.png",
+      aiModel: aiModel,
+      description: description,
+      uid: uid4,
+      email: user?.email,
+    });
+    console.log("Result: ", reslut);
   };
   return (
     <div className="mt-10">
