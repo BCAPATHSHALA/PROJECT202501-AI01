@@ -2,7 +2,7 @@
 
 import { prompt1 } from "@/data/Constants";
 import axios from "axios";
-import { LoaderCircle } from "lucide-react";
+import { Loader2, LoaderCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { SelectionDetails } from "../_components/SelectionDetails";
@@ -32,6 +32,7 @@ const page = () => {
 
   const getRecordInfo = async () => {
     setLoading(true);
+    setIsReady(false);
     const result = await axios.get<RECORD & { error?: string }>(
       `/api/wireframe-to-code?uid=${uid}`
     );
@@ -57,6 +58,7 @@ const page = () => {
       generateCode(record);
     }
     setLoading(false);
+    setIsReady(true);
   };
 
   // If your API is actually streaming responses (like OpenAI's streaming API), then using fetch instead of Axios is necessary
@@ -110,11 +112,19 @@ const page = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 p-5 gap-10">
         {/* Selection Details */}
         <div>
-          <SelectionDetails record={record} />
+          <SelectionDetails record={record} regenerateCode={getRecordInfo} isReady={isReady} />
         </div>
         {/* Code Editor */}
         <div className="col-span-4">
-          <CodeEditor codeResponse={codeResponse} isReady={isReady} />
+          {loading ? (
+            <div>
+              <h2 className="flex items-center justify-center bg-slate-100 h-[80vh] rounded-md font-bold text-2xl text-center p-20">
+                <Loader2 className="animate-spin" /> Analyzing the wireframe
+              </h2>
+            </div>
+          ) : (
+            <CodeEditor codeResponse={codeResponse} isReady={isReady} />
+          )}
         </div>
       </div>
     </div>
