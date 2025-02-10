@@ -78,7 +78,7 @@ function ImageUpload() {
 
     if (result?.data?.error) {
       toast({
-        title: "Error",
+        title: "Buy more credits",
         description: "You have no credits",
         variant: "destructive",
       });
