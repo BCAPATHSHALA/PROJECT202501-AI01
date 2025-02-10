@@ -17,9 +17,7 @@ export const SelectionDetails = ({
   regenerateCode: any;
   isReady: any;
 }) => {
-  console.log("record-selection: ", record);
-
-  if (!record) return <p>No record found</p>; // ✅ Handle null case
+  if (!record) return <p>No record found</p>;
 
   return (
     record && (

@@ -14,8 +14,9 @@ export interface RECORD {
   imageUrl: string;
   aiModel: string;
   description: string;
-  code: string;
+  code: { res: string } | null;
   createdBy: string;
+  uid: string;
 }
 
 const page = () => {
@@ -27,40 +28,50 @@ const page = () => {
 
   useEffect(() => {
     uid && getRecordInfo();
-    return () => {};
   }, [uid]);
 
+  // Get the record
   const getRecordInfo = async () => {
     setLoading(true);
-    setIsReady(false);
-    const result = await axios.get<RECORD & { error?: string }>(
-      `/api/wireframe-to-code?uid=${uid}`
-    );
 
-    if (result?.data?.error) {
-      console.error(result?.data?.error);
-      return;
+    try {
+      const result = await axios.get<RECORD & { error?: string }>(
+        `/api/wireframe-to-code?uid=${uid}`
+      );
+
+      if (result?.data?.error) {
+        console.error(result?.data?.error);
+        return;
+      }
+
+      // console.log("Fetched Record:", result?.data);
+      setRecord(result.data);
+
+      if (result?.data?.code === null) {
+        // generate code if not found in db
+        const record: RECORD = {
+          id: result?.data?.id,
+          imageUrl: result?.data?.imageUrl,
+          aiModel: result?.data?.aiModel,
+          description: result?.data?.description,
+          code: result?.data?.code,
+          createdBy: result?.data?.createdBy,
+          uid: result?.data?.uid,
+        };
+        generateCode(record);
+      } else {
+        // set code if found in db
+        setCodeResponse(result?.data?.code?.res);
+        setIsReady(true);
+      }
+    } catch (error) {
+      console.error("An error occurred while fetching the record:", error);
+    } finally {
+      setLoading(false);
     }
-
-    console.log("Fetched Record:", result?.data);
-    setRecord(result.data);
-
-    if (result?.data?.code === null) {
-      // generate code if not found in db
-      const record: RECORD = {
-        id: result?.data?.id,
-        imageUrl: result?.data?.imageUrl,
-        aiModel: result?.data?.aiModel,
-        description: result?.data?.description,
-        code: result?.data?.code,
-        createdBy: result?.data?.createdBy,
-      };
-      generateCode(record);
-    }
-    setLoading(false);
-    setIsReady(true);
   };
 
+  //  Generate the streaming code
   // If your API is actually streaming responses (like OpenAI's streaming API), then using fetch instead of Axios is necessary
   const generateCode = async (record: RECORD) => {
     setLoading(true);
@@ -83,7 +94,7 @@ const page = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
 
-      let accumulatedText = "";
+      // let accumulatedText = "";
 
       while (true) {
         const { value, done } = await reader.read();
@@ -94,8 +105,8 @@ const page = () => {
           .replace("```typescript", "")
           .replace("```", "");
 
-        accumulatedText += chunk;
-        setCodeResponse(accumulatedText);
+        // accumulatedText += chunk;
+        setCodeResponse((accumulatedText) => accumulatedText + chunk);
         console.log("chunk", chunk);
       }
     } catch (error) {
@@ -103,6 +114,27 @@ const page = () => {
     } finally {
       setLoading(false);
       setIsReady(true);
+      // updateCodeToDB(); // Save the final code to the database
+    }
+  };
+
+  // This updates the code in the database after the code is generated
+  useEffect(() => {
+    if (codeResponse !== "" && record?.uid && isReady) updateCodeToDB();
+  }, [codeResponse && record && isReady]);
+
+  // Save the generated code into the database
+  const updateCodeToDB = async () => {
+    if (!record?.uid || !codeResponse) return;
+
+    try {
+      const response = await axios.put("/api/wireframe-to-code", {
+        uid: record.uid,
+        codeResponse: { res: codeResponse },
+      });
+      console.log("Code saved to DB:", response.data);
+    } catch (error) {
+      console.error("Error saving code to DB:", error);
     }
   };
 
@@ -112,7 +144,11 @@ const page = () => {
       <div className="grid grid-cols-1 md:grid-cols-5 p-5 gap-10">
         {/* Selection Details */}
         <div>
-          <SelectionDetails record={record} regenerateCode={getRecordInfo} isReady={isReady} />
+          <SelectionDetails
+            record={record}
+            regenerateCode={getRecordInfo}
+            isReady={isReady}
+          />
         </div>
         {/* Code Editor */}
         <div className="col-span-4">

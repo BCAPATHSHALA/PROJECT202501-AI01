@@ -10,6 +10,8 @@ import { amethyst } from "@codesandbox/sandpack-themes";
 import { DEPENDANCIES } from "@/data/Constants";
 
 export const CodeEditor = ({ codeResponse, isReady }: any) => {
+  // console.log("codeResponse", codeResponse);
+  // console.log("isReady", isReady);
   return (
     <div>
       {isReady ? (

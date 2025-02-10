@@ -46,3 +46,18 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ error: "No record found" }, { status: 404 });
 }
+
+// API for save the generated code to database
+export async function PUT(req: NextRequest) {
+  const { uid, codeResponse } = await req.json();
+
+  const result = await db
+    .update(wireframeToCodeTable)
+    .set({
+      code: codeResponse,
+    })
+    .where(eq(wireframeToCodeTable.uid, uid))
+    .returning({ uid: wireframeToCodeTable.uid });
+
+  return NextResponse.json(result);
+}
