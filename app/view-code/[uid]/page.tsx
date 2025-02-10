@@ -120,7 +120,8 @@ const page = () => {
 
   // This updates the code in the database after the code is generated
   useEffect(() => {
-    if (codeResponse !== "" && record?.uid && isReady) updateCodeToDB();
+    if (codeResponse !== "" && record?.uid && isReady && !record?.code)
+      updateCodeToDB();
   }, [codeResponse && record && isReady]);
 
   // Save the generated code into the database
