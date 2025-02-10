@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
 
   console.log("user: ", user);
 
-  if (user && user.length > 0 && user[0]?.credits && user[0]?.credits < 1) {
-    return NextResponse.json({ error: "You have no credits" }, { status: 403 });
+  if (user.length > 0 && user[0]?.credits === 0) {
+    return NextResponse.json({ error: "You have no credits" });
   }
 
   // Insert the wireframe to code, and update the user credits
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
     .returning({ id: wireframeToCodeTable.id });
 
   // Update the user credits
-  if (user[0]?.credits !== undefined && user[0]?.credits !== null) {
+  if (user.length > 0 && user[0]?.credits && user[0]?.credits > 0) {
     const updatedUser = await db
       .update(usersTable)
       .set({
-        credits: user[0].credits - 1,
+        credits: user[0]?.credits ? user[0].credits - 1 : 0,
       })
       .where(eq(usersTable.email, email))
       .returning({ id: usersTable.id });

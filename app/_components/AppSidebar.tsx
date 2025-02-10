@@ -56,8 +56,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="mt-5">
               {items.map((item, index) => (
-                // <SidebarMenuItem key={item.title} className='p-2'>
-                //     <SidebarMenuButton asChild className=''>
                 <Link
                   href={item.url}
                   key={index}
@@ -69,8 +67,6 @@ export function AppSidebar() {
                   <item.icon className="h-5 w-5" />
                   <span>{item.title}</span>
                 </Link>
-                //     </SidebarMenuButton>
-                // </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

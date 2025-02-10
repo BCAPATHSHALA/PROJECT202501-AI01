@@ -26,10 +26,12 @@ function ImageUpload() {
   const [file, setFile] = React.useState<File | null>(null);
   const [aiModel, setAiModel] = React.useState<string | null>(null);
   const [description, setDescription] = React.useState<string | null>(null);
-  // const { user } = useAuthContext();
-  const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
+  const { user } = useAuthContext();
+  const router = useRouter();
+
+  // Select image method
   const OnImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
 
@@ -41,6 +43,7 @@ function ImageUpload() {
     }
   };
 
+  // Wireframe to code converter method
   const OnConvertToCodeButtonClick = async () => {
     if (!file || !aiModel || !description) {
       console.error("Please fill all the fields");
@@ -62,14 +65,14 @@ function ImageUpload() {
 
     // Save data to database
     const uid4 = uuidv4();
-    console.log("UID: ", uid4);
+    // console.log("UID: ", uid4);
     const result = await axios.post("/api/wireframe-to-code", {
       imageUrl:
-        "https://balsamiq.com/assets/learn/articles/wireframe-example.png",
+        "https://balsamiq.com/assets/learn/articles/wireframe-example.png", // Todo: handle it later using firebase storage/Cloudinary storage
       aiModel: aiModel,
       description: description,
       uid: uid4,
-      email: "manojkumargfg.1@gmail.com",
+      email: user?.email,
     });
     console.log("Result: ", result.data);
 
@@ -79,6 +82,7 @@ function ImageUpload() {
         description: "You have no credits",
         variant: "destructive",
       });
+      console.log("You hane no credit");
       setLoading(false);
       return; // add this because not going to generate code
     }
