@@ -14,6 +14,7 @@ import {
 import { Paintbrush, CircleDollarSign, Home } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const items = [
   {
@@ -22,8 +23,8 @@ const items = [
     icon: Home,
   },
   {
-    title: "Design",
-    url: "/design",
+    title: "Designs",
+    url: "/designs",
     icon: Paintbrush,
   },
   {
@@ -57,7 +58,7 @@ export function AppSidebar() {
               {items.map((item, index) => (
                 // <SidebarMenuItem key={item.title} className='p-2'>
                 //     <SidebarMenuButton asChild className=''>
-                <a
+                <Link
                   href={item.url}
                   key={index}
                   className={`p-2 text-lg flex gap-2 items-center
@@ -67,7 +68,7 @@ export function AppSidebar() {
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.title}</span>
-                </a>
+                </Link>
                 //     </SidebarMenuButton>
                 // </SidebarMenuItem>
               ))}

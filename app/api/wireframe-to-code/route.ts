@@ -27,7 +27,11 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const uid = searchParams?.get("uid");
 
+  // I want to fetch the record based on email to display the all wireframes
+  const email = searchParams?.get("email");
+
   console.log("uid: ", uid);
+  console.log("email: ", email);
 
   if (uid) {
     const result = await db
@@ -42,6 +46,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(result[0], { status: 200 });
+  } else if (email) {
+    const result = await db
+      .select()
+      .from(wireframeToCodeTable)
+      .where(eq(wireframeToCodeTable.createdBy, email));
+
+    return NextResponse.json(result, { status: 200 });
   }
 
   return NextResponse.json({ error: "No record found" }, { status: 404 });
