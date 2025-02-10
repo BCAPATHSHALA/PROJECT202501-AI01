@@ -1,4 +1,6 @@
 import { integer, pgTable, varchar, json } from "drizzle-orm/pg-core";
+
+// Create the schema for user table
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),

@@ -19,13 +19,14 @@ import { v4 as uuidv4 } from "uuid";
 import { useAuthContext } from "@/app/provider";
 import { useRouter } from "next/navigation";
 import { AiModelList } from "@/data/Constants";
+import { toast } from "@/hooks/use-toast";
 
 function ImageUpload() {
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const [file, setFile] = React.useState<File | null>(null);
   const [aiModel, setAiModel] = React.useState<string | null>(null);
   const [description, setDescription] = React.useState<string | null>(null);
-  const { user } = useAuthContext();
+  // const { user } = useAuthContext();
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
@@ -62,15 +63,25 @@ function ImageUpload() {
     // Save data to database
     const uid4 = uuidv4();
     console.log("UID: ", uid4);
-    const reslut = await axios.post("/api/wireframe-to-code", {
+    const result = await axios.post("/api/wireframe-to-code", {
       imageUrl:
         "https://balsamiq.com/assets/learn/articles/wireframe-example.png",
       aiModel: aiModel,
       description: description,
       uid: uid4,
-      email: user?.email,
+      email: "manojkumargfg.1@gmail.com",
     });
-    console.log("Result: ", reslut);
+    console.log("Result: ", result.data);
+
+    if (result?.data?.error) {
+      toast({
+        title: "Error",
+        description: "You have no credits",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return; // add this because not going to generate code
+    }
 
     setLoading(false);
     router.push(`/view-code/${uid4}`);
