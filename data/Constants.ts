@@ -16,11 +16,39 @@ export const AiModelList = [
   },
 ];
 
+// @ts-ignore
 // Todo: Make this prompt for sandpack based on ai model
-export const prompt1 =
-  "Generate code in react and tailwindcss from this wireframe:";
+
+// This prompt is for generating React.Js Code for Uploading Wireframe or Design Image URL With Tailwind CSS
+export const prompt1 = `
+Generate Code for Uploading Wireframe or Design Image URL With Tailwind CSS & React.Js
+
+Return only the code without any explanation. And Response in JSON format with the following schema:
+{
+  "files": {
+    "/App.js": {
+      "code": "..."
+      },
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.2.7",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+  }
+}
+
+
+I want to generate code for uploading wireframe or design image URL with Tailwind CSS and React.Js. The code should be minimal and easy to understand.
+
+Code should be fully responsive for all screen sizes and should fit into a single file without any dependencies or external libraries other than Tailwind CSS and React.Js.
+`;
 
 export const DEPENDANCIES = {
-  react: "18.2.0",
-  "react-dom": "18.2.0",
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "tailwindcss": "^3.2.7",
+  "autoprefixer": "^10.4.13",
+  "postcss": "^8.4.21",
 };
