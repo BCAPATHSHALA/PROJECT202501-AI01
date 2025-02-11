@@ -74,7 +74,7 @@ function ImageUpload() {
       uid: uid4,
       email: user?.email,
     });
-    console.log("Result: ", result.data);
+    console.log("Saved Wireframe Information Except Code in 1st Step: ", result.data);
 
     if (result?.data?.error) {
       toast({
@@ -82,7 +82,6 @@ function ImageUpload() {
         description: "You have no credits",
         variant: "destructive",
       });
-      console.log("You hane no credit");
       setLoading(false);
       return; // add this because not going to generate code
     }

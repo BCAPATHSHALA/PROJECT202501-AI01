@@ -1,21 +1,27 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import {
   Sandpack,
   SandpackProvider,
   SandpackLayout,
   SandpackCodeEditor,
   SandpackPreview,
+  SandpackFileExplorer,
 } from "@codesandbox/sandpack-react";
-import { amethyst } from "@codesandbox/sandpack-themes";
+import { amethyst, nightOwl } from "@codesandbox/sandpack-themes";
 import { DEPENDANCIES } from "@/data/Constants";
 
 export const CodeEditor = ({ codeResponse, isReady }: any) => {
   // console.log("codeResponse", codeResponse);
   // console.log("isReady", isReady);
+
+  const [activeTab, setActiveTab] = useState("code");
+  // const [file, setFile] = useState(DEFAULT_FILE);
+
   return (
     <div>
-      {isReady ? (
-        // After code is generated render Sandpack to preview code
+      {!isReady ? (
+        // While generating code render Sandpack (After - Yeh pahle wala logic tha 😉)
         <Sandpack
           theme={"light"}
           options={{
@@ -35,29 +41,70 @@ export const CodeEditor = ({ codeResponse, isReady }: any) => {
           template="react"
         />
       ) : (
-        // While code is generating render Sandpack to preview code (Streaming Text)
-        <SandpackProvider
-          template="react"
-          theme={amethyst}
-          files={{
-            "/app.js": {
-              code: `${codeResponse}`,
-              active: true,
-            },
-          }}
-          customSetup={{
-            dependencies: {
-              ...DEPENDANCIES,
-            },
-          }}
-          options={{
-            externalResources: ["https://cdn.tailwindcss.com"],
-          }}
-        >
-          <SandpackLayout>
-            <SandpackCodeEditor showTabs={true} style={{ height: "70vh" }} />
-          </SandpackLayout>
-        </SandpackProvider>
+        // After generating code render Sandpack to preview (Before)
+        <>
+          <div className="bg-[#181818] w-full border p-2">
+            <div className="flex text-white gap-2 justify-center items-center flex-wrap shrink-0 bg-black p-1 w-[140px] rounded-full">
+              <h2
+                onClick={() => setActiveTab("code")}
+                className={`text-sm cursor-pointer ${
+                  activeTab === "code" &&
+                  "text-blue-500 bg-blue-500 bg-opacity-25 p-2 rounded-full"
+                }`}
+              >
+                Code
+              </h2>
+              <h2
+                onClick={() => setActiveTab("preview")}
+                className={`text-sm cursor-pointer ${
+                  activeTab === "preview" &&
+                  "text-blue-500 bg-blue-500 bg-opacity-25 p-2 rounded-full"
+                }`}
+              >
+                Preview
+              </h2>
+            </div>
+          </div>
+          <SandpackProvider
+            template="react"
+            theme={amethyst}
+            files={{
+              "/App.js": {
+                code: `${codeResponse}`,
+                active: true,
+              },
+            }}
+            customSetup={{
+              dependencies: {
+                ...DEPENDANCIES,
+              },
+            }}
+            options={{
+              externalResources: ["https://cdn.tailwindcss.com"],
+            }}
+          >
+            <SandpackLayout>
+              {activeTab === "code" && (
+                <>
+                  <SandpackFileExplorer style={{ height: "80vh" }} />
+                  <SandpackCodeEditor
+                    showTabs={true}
+                    style={{ height: "80vh" }}
+                  />
+                </>
+              )}
+              {activeTab === "preview" && (
+                <>
+                  <SandpackFileExplorer style={{ height: "80vh" }} />
+                  <SandpackPreview
+                    style={{ height: "80vh" }}
+                    showNavigator={true}
+                  />
+                </>
+              )}
+            </SandpackLayout>
+          </SandpackProvider>
+        </>
       )}
     </div>
   );
